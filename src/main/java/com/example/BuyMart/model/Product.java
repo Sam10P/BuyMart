@@ -27,6 +27,7 @@ public class Product {
     String name;
 
     @Column(name = "category")
+    @Enumerated(EnumType.STRING)
     Category category;
 
     @Column(name = "price")

@@ -3,6 +3,7 @@ package com.example.BuyMart.service.impl;
 import com.example.BuyMart.Enum.Category;
 import com.example.BuyMart.dto.RequestDto.ProductRequestDto;
 import com.example.BuyMart.dto.ResponseDto.ProductResponseDto;
+import com.example.BuyMart.exception.ProductNotFoundException;
 import com.example.BuyMart.exception.SellerNotFoundException;
 import com.example.BuyMart.model.Product;
 import com.example.BuyMart.model.Seller;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -61,5 +63,35 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return productResponseDtos;
+    }
+
+    @Override
+    public void changeCategoryOfProduct(Category category, int productId) throws ProductNotFoundException {
+
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if(!optionalProduct.isPresent()){
+            throw new ProductNotFoundException("product does not exist!!");
+        }
+//        // category id
+//        // 1 : FASHION
+//        // 2 : SPORTS
+//        // 3 : FOOD
+//        // 4 : ELECTRONICS
+//        // 5 : COSMETICS
+//        Product product = optionalProduct.get();
+//        Category newCategory = Category.FASHION;
+//        if(category == 2){
+//            newCategory = Category.SPORTS;
+//        }
+//        else if(category == 3){
+//            newCategory = Category.FOOD;
+//        } else if (category == 4) {
+//            newCategory = Category.ELECTRONICS;
+//        } else if (category == 5) {
+//            newCategory = Category.COSMETICS;
+//        }
+        Product product = optionalProduct.get();
+        product.setCategory(category);
+        productRepository.save(product);
     }
 }

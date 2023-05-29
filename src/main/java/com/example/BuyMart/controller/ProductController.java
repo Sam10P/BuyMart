@@ -3,6 +3,7 @@ package com.example.BuyMart.controller;
 import com.example.BuyMart.Enum.Category;
 import com.example.BuyMart.dto.RequestDto.ProductRequestDto;
 import com.example.BuyMart.dto.ResponseDto.ProductResponseDto;
+import com.example.BuyMart.exception.ProductNotFoundException;
 import com.example.BuyMart.exception.SellerNotFoundException;
 import com.example.BuyMart.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,12 @@ public class ProductController {
         return new ResponseEntity(productResponseDtos, HttpStatus.FOUND);
     }
 
+    // change the category of a product
+    @PutMapping("/change-category-of-a-product")
+    public ResponseEntity changeCategoryOfProduct(@RequestParam Category category, @RequestParam int productId) throws ProductNotFoundException {
+        productService.changeCategoryOfProduct(category, productId);
+        return new ResponseEntity("the category has been changed", HttpStatus.CREATED);
+    }
 
     // get all the products of a category
 
