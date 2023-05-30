@@ -1,6 +1,7 @@
 package com.example.BuyMart.controller;
 
 
+import com.example.BuyMart.Enum.CardType;
 import com.example.BuyMart.dto.RequestDto.CardRequestDto;
 import com.example.BuyMart.dto.ResponseDto.CardResponseDto;
 import com.example.BuyMart.exception.CustomerNotFoundException;
@@ -8,10 +9,7 @@ import com.example.BuyMart.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/card")
@@ -32,6 +30,18 @@ public class CardController {
     }
 
     // tell me the card type which exists max number of times.
+    @GetMapping("/maximum-cards-of-a-cardtype")
+    public ResponseEntity maximumCardsOfACardType(){
+
+        String cardType = cardService.maximumCardsOfACardType();
+        return new ResponseEntity(cardType, HttpStatus.FOUND);
+    }
 
     // tell me the card type which exists min number of times.
+    @GetMapping("/minimum-cards-of-a-cardtype")
+    public ResponseEntity minimumCardsOfACardType(){
+
+        String cardType = cardService.minimumCardsOfACardType();
+        return new ResponseEntity(cardType, HttpStatus.FOUND);
+    }
 }
