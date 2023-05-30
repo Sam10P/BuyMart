@@ -1,6 +1,7 @@
 package com.example.BuyMart.service.impl;
 
 import com.example.BuyMart.Enum.Category;
+import com.example.BuyMart.Enum.ProductStatus;
 import com.example.BuyMart.dto.RequestDto.ProductRequestDto;
 import com.example.BuyMart.dto.ResponseDto.ProductResponseDto;
 import com.example.BuyMart.exception.ProductNotFoundException;
@@ -93,5 +94,91 @@ public class ProductServiceImpl implements ProductService {
         Product product = optionalProduct.get();
         product.setCategory(category);
         productRepository.save(product);
+    }
+
+    @Override
+    public List<ProductResponseDto> allProductsOfACategory(Category category) {
+
+        List<Product> products = productRepository.findByCategory(category);
+
+        // prepare a list of Dtos
+        List<ProductResponseDto> productResponseDtos = new ArrayList<>();
+        for(Product product : products){
+            productResponseDtos.add(ProductTransformer.ProductToProductResponseDto(product));
+        }
+
+        return productResponseDtos;
+    }
+
+    @Override
+    public List<ProductResponseDto> productsOfACategoryHavePriceGreaterThanK(Category category, int price) {
+
+        List<Product> products = productRepository.findByCategory(category);
+
+        List<ProductResponseDto> productResponseDtos = new ArrayList<>();
+        for(Product product : products){
+            if(product.getPrice() > price){
+                productResponseDtos.add(ProductTransformer.ProductToProductResponseDto(product));
+            }
+        }
+
+        return productResponseDtos;
+    }
+
+    @Override
+    public List<ProductResponseDto> top5CheapestProduct() {
+
+        List<Product> products = productRepository.topCheapestProduct();
+
+        List<ProductResponseDto> productResponseDtos = new ArrayList<>();
+        for(Product product : products){
+            productResponseDtos.add(ProductTransformer.ProductToProductResponseDto(product));
+            if(productResponseDtos.size() == 5){
+                break;
+            }
+        }
+        return productResponseDtos;
+    }
+
+    @Override
+    public List<ProductResponseDto> top5CostliestProduct() {
+
+        List<Product> products = productRepository.topCostliestProduct();
+
+        List<ProductResponseDto> productResponseDtos = new ArrayList<>();
+        for(Product product : products){
+            productResponseDtos.add(ProductTransformer.ProductToProductResponseDto(product));
+            if(productResponseDtos.size() == 5){
+                break;
+            }
+        }
+        return productResponseDtos;
+    }
+
+    @Override
+    public List<ProductResponseDto> productsBySellerEmailId(String emailId) throws SellerNotFoundException {
+
+        Seller seller = sellerRepository.findByEmailId(emailId);
+        if(seller == null){
+            throw new SellerNotFoundException("Seller does not exist!!!");
+        }
+        List<Product> products = seller.getProducts();
+        List<ProductResponseDto> productResponseDtos = new ArrayList<>();
+        for(Product product : products){
+            productResponseDtos.add(ProductTransformer.ProductToProductResponseDto(product));
+        }
+        return productResponseDtos;
+    }
+
+    @Override
+    public List<ProductResponseDto> outOfStockProduct() {
+
+        List<Product> products = productRepository.findByProductStatus(ProductStatus.OUT_OF_STOCK);
+
+        List<ProductResponseDto> productResponseDtos = new ArrayList<>();
+        for(Product product : products){
+            productResponseDtos.add(ProductTransformer.ProductToProductResponseDto(product));
+        }
+        return productResponseDtos;
     }
 }

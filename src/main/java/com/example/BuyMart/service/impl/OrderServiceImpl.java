@@ -15,12 +15,11 @@ import com.example.BuyMart.repository.ProductRepository;
 import com.example.BuyMart.service.OrderService;
 import com.example.BuyMart.transformer.ItemTransformer;
 import com.example.BuyMart.transformer.OrderTransformer;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -120,6 +119,79 @@ public class OrderServiceImpl implements OrderService {
         orderEntity.setCustomer(cart.getCustomer());
 
         return orderEntity;
+    }
+
+    @Override
+    public List<OrderResponseDto> top5OrderWithHighestValue() {
+
+        List<OrderEntity> orders = orderRepository.orderWithHighestValue();
+        List<OrderResponseDto> orderResponseDtos = new ArrayList<>();
+
+        for(OrderEntity order : orders){
+            orderResponseDtos.add(OrderTransformer.OrderToOrderResponseDto(order));
+            if(orderResponseDtos.size() == 5){
+                break;
+            }
+        }
+
+        return orderResponseDtos;
+    }
+
+    @Override
+    public List<OrderResponseDto> allOrdersOfACustomer(String emailId) throws CustomerNotFoundException {
+
+        Customer customer = customerRepository.findByEmailId(emailId);
+        if(customer == null){
+            throw new CustomerNotFoundException("Customer does not exist!!!");
+        }
+
+        List<OrderEntity> orders = orderRepository.findByCustomer(customer);
+        List<OrderResponseDto> orderResponseDtos = new ArrayList<>();
+
+        for(OrderEntity order : orders){
+            orderResponseDtos.add(OrderTransformer.OrderToOrderResponseDto(order));
+        }
+        return orderResponseDtos;
+    }
+
+    @Override
+    public List<OrderResponseDto> top5HighestValueOrdersOfACustomer(String emailId) throws CustomerNotFoundException {
+
+        Customer customer = customerRepository.findByEmailId(emailId);
+        if(customer == null){
+            throw new CustomerNotFoundException("Customer does not exist!!!");
+        }
+
+        List<OrderEntity> orders = orderRepository.HighestValueOrder(customer.getId());
+        List<OrderResponseDto> orderResponseDtos = new ArrayList<>();
+
+        for(OrderEntity order : orders){
+            orderResponseDtos.add(OrderTransformer.OrderToOrderResponseDto(order));
+            if(orderResponseDtos.size() == 5){
+                break;
+            }
+        }
+        return orderResponseDtos;
+    }
+
+    @Override
+    public List<OrderResponseDto> top5RecentOrdersOfACustomer(String emailId) throws CustomerNotFoundException {
+
+        Customer customer = customerRepository.findByEmailId(emailId);
+        if(customer == null){
+            throw new CustomerNotFoundException("Customer does not exist!!!");
+        }
+
+        List<OrderEntity> orders = orderRepository.RecentOrder(customer.getId());
+        List<OrderResponseDto> orderResponseDtos = new ArrayList<>();
+
+        for(OrderEntity order : orders){
+            orderResponseDtos.add(OrderTransformer.OrderToOrderResponseDto(order));
+            if(orderResponseDtos.size() == 5){
+                break;
+            }
+        }
+        return orderResponseDtos;
     }
 
     private String generateMaskedCardNo(Card card){

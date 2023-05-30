@@ -47,16 +47,54 @@ public class ProductController {
     }
 
     // get all the products of a category
+    @GetMapping("/all-products-of-a-category")
+    public ResponseEntity allProductsOfACategory(@RequestParam Category category){
+        List<ProductResponseDto> productResponseDtos = productService.allProductsOfACategory(category);
+        return new ResponseEntity(productResponseDtos, HttpStatus.FOUND);
+    }
 
     // get all the products in a category who have price greater than 500
+    @GetMapping("/all-products-in-a-category-have-price-greater-than-k")
+    public ResponseEntity productsOfACategoryHavePriceGreaterThanK(@RequestParam Category category, @RequestParam int price){
+
+        List<ProductResponseDto> productResponseDtos = productService.productsOfACategoryHavePriceGreaterThanK(category, price);
+        return new ResponseEntity(productResponseDtos, HttpStatus.FOUND);
+    }
+
 
     // get the top 5 cheapest products in a category
+    @GetMapping("/top-5-cheapest-product")
+    public ResponseEntity top5CheapestProduct(){
 
-    // get top 5 mos expensive product in a category
+        List<ProductResponseDto> productResponseDtos = productService.top5CheapestProduct();
+        return new ResponseEntity(productResponseDtos, HttpStatus.FOUND);
+    }
+
+    // get top 5 most expensive product in a category
+    @GetMapping("/top-5-costliest-product")
+    public ResponseEntity top5CostliestProduct(){
+
+        List<ProductResponseDto> productResponseDtos = productService.top5CostliestProduct();
+        return new ResponseEntity(productResponseDtos, HttpStatus.FOUND);
+    }
 
     // get all the products of seller based on emailId of the seller
+    @GetMapping("/products-of-a-seller-by-email/{emailId}")
+    public ResponseEntity productsBySellerEmailId(@PathVariable String emailId){
+        try {
+            List<ProductResponseDto> productResponseDtos = productService.productsBySellerEmailId(emailId);
+            return new ResponseEntity(productResponseDtos, HttpStatus.FOUND);
+        } catch (SellerNotFoundException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     // get all the out of stock products for a particular category
+    @GetMapping("/out-of-stock-products")
+    public ResponseEntity outOfStockProduct(){
+        List<ProductResponseDto> productResponseDtos = productService.outOfStockProduct();
+        return new ResponseEntity(productResponseDtos, HttpStatus.FOUND);
+    }
 
     // send an email to the seller of the product if the product is out of stock
 
