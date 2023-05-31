@@ -17,9 +17,15 @@ import com.example.BuyMart.transformer.ItemTransformer;
 import com.example.BuyMart.transformer.OrderTransformer;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
+
+import static java.awt.SystemColor.text;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -35,6 +41,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     OrderRepository orderRepository;
+
+    @Autowired
+    private JavaMailSender emailSender;
+
 
     @Override
     public OrderResponseDto placeOrder(OrderRequestDto orderRequestDto) throws CustomerNotFoundException, ProductNotFoundException, InsufficientQuantityException, InvalidCardException {
@@ -87,6 +97,18 @@ public class OrderServiceImpl implements OrderService {
         customer.getOrders().add(savedOrder);
         product.getItems().add(savedOrder.getItems().get(0)); // only one item that's why get(0)
 
+        //Send Email
+        String text = "Hurray!! " + customer.getName() + " Your order of " + item.getProduct().getName() + " has been placed." + "\n" + "\n"
+                + "Your order ID is " + savedOrder.getOrderNo() + " and the order is expected to arrive on " + LocalDate.now().plusDays(5) + "." + "\n" + "\n"
+                + "The total order value is " + savedOrder.getTotalValue() + "₹ and it is prepaid by card " + maskedCard + " on " + LocalTime.now();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("buymartproject@gmail.com");
+        message.setTo(customer.getEmailId());
+        message.setSubject("Order Placed Successfully !!!");
+        message.setText(text);
+        emailSender.send(message);
+
+
         // prepare response dto
         return OrderTransformer.OrderToOrderResponseDto(savedOrder);
     }
@@ -96,6 +118,8 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.setOrderNo(String.valueOf(UUID.randomUUID()));
         orderEntity.setCardUsed(generateMaskedCardNo(card));
+
+        String itemNames = "";
 
         int totalValue = 0;
         for(Item item : cart.getItems()){
@@ -112,11 +136,27 @@ public class OrderServiceImpl implements OrderService {
 
             // set order entity to item
             item.setOrderEntity(orderEntity);
+
+            // Create String of items to send email
+            itemNames += product.getName() + ", ";
         }
 
         orderEntity.setTotalValue(totalValue);
         orderEntity.setItems(cart.getItems());
         orderEntity.setCustomer(cart.getCustomer());
+
+        Customer customer = cart.getCustomer();
+
+        // send email
+        String text = "Hurray!! " + customer.getName() + " Your order of " + itemNames + "has been placed." + "\n" + "\n"
+                + "Your order ID is " + orderEntity.getOrderNo() + " and the order is expected to arrive on " + LocalDate.now().plusDays(5) + "." + "\n" + "\n"
+                + "The total order value is " + orderEntity.getTotalValue() + "₹ and it is prepaid by card " + orderEntity.getCardUsed() + " on " + LocalTime.now();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("buymartproject@gmail.com");
+        message.setTo(customer.getEmailId());
+        message.setSubject("Order Placed Successfully !!!");
+        message.setText(text);
+        emailSender.send(message);
 
         return orderEntity;
     }
